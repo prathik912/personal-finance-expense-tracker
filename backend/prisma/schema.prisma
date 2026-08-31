@@ -1,0 +1,179 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  firstName    String
+  lastName     String
+  email        String   @unique
+  passwordHash String
+  phone        String?
+  timezone     String?  @default("Pacific Standard Time (PST)")
+  avatar       String?  @default("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250")
+  plan         String   @default("Premium")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  categories        Category[]
+  expenses          Expense[]
+  incomes           Income[]
+  budgets           Budget[]
+  budgetAdjustments BudgetAdjustment[]
+  savingsGoals      SavingsGoal[]
+  recurringExpenses RecurringExpense[]
+  connectedAccounts ConnectedAccount[]
+
+  @@map("users")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  userId    String?
+  name      String
+  icon      String   @default("tag")
+  color     String   @default("#2563eb")
+  type      String   @default("EXPENSE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user              User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses          Expense[]
+  incomes           Income[]
+  budgets           Budget[]
+  budgetAdjustments BudgetAdjustment[]
+  recurringExpenses RecurringExpense[]
+
+  @@map("categories")
+}
+
+model Expense {
+  id         String   @id @default(uuid())
+  userId     String
+  categoryId String?
+  merchant   String
+  note       String?
+  amount     Decimal
+  date       DateTime @default(now())
+  status     String   @default("COMPLETED")
+  flag       String   @default("ONE_TIME")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@map("expenses")
+}
+
+model Income {
+  id         String   @id @default(uuid())
+  userId     String
+  categoryId String?
+  source     String
+  note       String?
+  amount     Decimal
+  date       DateTime @default(now())
+  status     String   @default("COMPLETED")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@map("incomes")
+}
+
+model Budget {
+  id         String   @id @default(uuid())
+  userId     String
+  categoryId String
+  amount     Decimal
+  month      Int
+  year       Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId, month, year])
+  @@map("budgets")
+}
+
+model BudgetAdjustment {
+  id         String   @id @default(uuid())
+  userId     String
+  categoryId String
+  adjustment String
+  prevLimit  Decimal
+  newLimit   Decimal
+  status     String   @default("Applied")
+  date       DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("budget_adjustments")
+}
+
+model SavingsGoal {
+  id            String   @id @default(uuid())
+  userId        String
+  title         String
+  category      String   @default("GENERAL")
+  icon          String   @default("target")
+  targetAmount  Decimal
+  currentAmount Decimal  @default(0)
+  deadline      DateTime
+  status        String   @default("In Progress")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("savings_goals")
+}
+
+model RecurringExpense {
+  id          String   @id @default(uuid())
+  userId      String
+  categoryId  String?
+  name        String
+  amount      Decimal
+  frequency   String   @default("MONTHLY")
+  nextDueDate DateTime
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@map("recurring_expenses")
+}
+
+model ConnectedAccount {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  type      String
+  status    String   @default("Connected")
+  lastSync  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("connected_accounts")
+}
