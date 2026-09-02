@@ -32,7 +32,13 @@ app.use(helmet({
   contentSecurityPolicy: false
 }));
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: (origin, callback) => {
+    if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      callback(null, true);
+    } else {
+      callback(null, process.env.FRONTEND_URL || true);
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
