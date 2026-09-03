@@ -57,7 +57,7 @@ export const renderLandingPage = () => {
 
           <div class="landing-hero-stats">
             <div class="landing-stat-item">
-              <h4>$2B+</h4>
+              <h4>₹2B+</h4>
               <p>MANAGED</p>
             </div>
             <div class="landing-stat-item">
@@ -83,7 +83,7 @@ export const renderLandingPage = () => {
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <div>
                   <span style="font-weight: 700; font-size: 0.875rem;">YOUR PERFORMANCE</span>
-                  <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">$45,231.89</div>
+                  <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">₹45,231.89</div>
                 </div>
                 <span class="badge badge-success">+12.5%</span>
               </div>

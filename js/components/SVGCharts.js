@@ -46,7 +46,7 @@ export const renderCashFlowAreaChart = (data, filterTime = '6M') => {
           const y = getY(val);
           return `
             <line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="var(--border-color)" stroke-dasharray="4 4" stroke-width="1"/>
-            <text x="${padding.left - 10}" y="${y + 4}" font-size="11" font-weight="600" fill="var(--text-muted)" text-anchor="end">$${val.toLocaleString()}</text>
+            <text x="${padding.left - 10}" y="${y + 4}" font-size="11" font-weight="600" fill="var(--text-muted)" text-anchor="end">${formatCurrency(val, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</text>
           `;
         }).join('')}
 
@@ -66,9 +66,9 @@ export const renderCashFlowAreaChart = (data, filterTime = '6M') => {
         <!-- Interactive Data Dots -->
         ${data.map((d, i) => `
           <circle cx="${getX(i)}" cy="${getY(d.income)}" r="6" fill="#ffffff" stroke="#10b981" stroke-width="3" 
-            class="chart-dot-item" data-title="${d.month} Income" data-value="$${d.income.toLocaleString()}" style="cursor: pointer; transition: transform 0.2s;" />
+            class="chart-dot-item" data-title="${d.month} Income" data-value="${formatCurrency(d.income)}" style="cursor: pointer; transition: transform 0.2s;" />
           <circle cx="${getX(i)}" cy="${getY(d.expense)}" r="6" fill="#ffffff" stroke="#2563eb" stroke-width="3" 
-            class="chart-dot-item" data-title="${d.month} Expense" data-value="$${d.expense.toLocaleString()}" style="cursor: pointer; transition: transform 0.2s;" />
+            class="chart-dot-item" data-title="${d.month} Expense" data-value="${formatCurrency(d.expense)}" style="cursor: pointer; transition: transform 0.2s;" />
         `).join('')}
       </svg>
     </div>
@@ -103,7 +103,7 @@ export const renderDonutChart = (categories) => {
         stroke-dashoffset="${dashoffset}"
         class="donut-segment"
         data-name="${cat.name}"
-        data-amount="$${cat.amount.toLocaleString()} (${cat.percentage}%)"
+        data-amount="${formatCurrency(cat.amount)} (${cat.percentage}%)"
         style="transition: all 0.3s ease; cursor: pointer;"
       />
     `;
@@ -116,7 +116,7 @@ export const renderDonutChart = (categories) => {
       </svg>
       <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; text-align: center;">
         <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em;" id="donut-center-label">TOTAL SPENT</span>
-        <span style="font-size: 1.35rem; font-weight: 800;" id="donut-center-value">$${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+        <span style="font-size: 1.35rem; font-weight: 800;" id="donut-center-value">${formatCurrency(total)}</span>
       </div>
     </div>
   `;
@@ -168,7 +168,7 @@ export const renderBarLineTrendChart = (data) => {
       <!-- Grid -->
       ${[0, 2000, 4000, 6000, 8000].map(val => `
         <line x1="${padding.left}" y1="${getY(val)}" x2="${width - padding.right}" y2="${getY(val)}" stroke="var(--border-color)" stroke-dasharray="3 3"/>
-        <text x="${padding.left - 8}" y="${getY(val) + 4}" font-size="10" font-weight="600" fill="var(--text-muted)" text-anchor="end">$${val}</text>
+        <text x="${padding.left - 8}" y="${getY(val) + 4}" font-size="10" font-weight="600" fill="var(--text-muted)" text-anchor="end">${formatCurrency(val, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</text>
       `).join('')}
 
       <!-- Bars -->
@@ -177,8 +177,8 @@ export const renderBarLineTrendChart = (data) => {
         const expH = (d.expense / maxVal) * chartH;
         const incH = (d.income / maxVal) * chartH;
         return `
-          <rect x="${x - barWidth - 2}" y="${padding.top + chartH - expH}" width="${barWidth}" height="${expH}" fill="#cbd5e1" rx="4" class="chart-bar" data-title="${d.month} Expenses" data-value="$${d.expense}"/>
-          <rect x="${x + 2}" y="${padding.top + chartH - incH}" width="${barWidth}" height="${incH}" fill="#3b82f6" rx="4" class="chart-bar" data-title="${d.month} Income" data-value="$${d.income}"/>
+          <rect x="${x - barWidth - 2}" y="${padding.top + chartH - expH}" width="${barWidth}" height="${expH}" fill="#cbd5e1" rx="4" class="chart-bar" data-title="${d.month} Expenses" data-value="${formatCurrency(d.expense)}"/>
+          <rect x="${x + 2}" y="${padding.top + chartH - incH}" width="${barWidth}" height="${incH}" fill="#3b82f6" rx="4" class="chart-bar" data-title="${d.month} Income" data-value="${formatCurrency(d.income)}"/>
           <text x="${x}" y="${height - 10}" font-size="11" font-weight="600" fill="var(--text-muted)" text-anchor="middle">${d.month}</text>
         `;
       }).join('')}
@@ -186,7 +186,7 @@ export const renderBarLineTrendChart = (data) => {
       <!-- Savings Trend Line -->
       <path d="M ${savingsPoints}" fill="none" stroke="#10b981" stroke-width="3.5" stroke-linecap="round"/>
       ${data.map((d, i) => `
-        <circle cx="${getX(i)}" cy="${getY(d.savings)}" r="5" fill="#10b981" stroke="#ffffff" stroke-width="2.5" class="chart-dot-item" data-title="${d.month} Savings" data-value="$${d.savings}"/>
+        <circle cx="${getX(i)}" cy="${getY(d.savings)}" r="5" fill="#10b981" stroke="#ffffff" stroke-width="2.5" class="chart-dot-item" data-title="${d.month} Savings" data-value="${formatCurrency(d.savings)}"/>
       `).join('')}
     </svg>
   `;
@@ -239,7 +239,7 @@ export const bindChartInteractivity = () => {
       const val = document.getElementById('donut-center-value');
       if (lbl && val) {
         lbl.innerText = 'TOTAL SPENT';
-        val.innerText = '$3,845.12';
+        val.innerText = formatCurrency(3845.12);
       }
     });
   });

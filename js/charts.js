@@ -67,7 +67,7 @@ const FinanceCharts = {
             mode: 'index',
             intersect: false,
             callbacks: {
-              label: (ctx) => ` ${ctx.dataset.label}: $${ctx.raw.toLocaleString()}`
+              label: (ctx) => ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)}`
             }
           }
         },
@@ -81,7 +81,7 @@ const FinanceCharts = {
             ticks: {
               color: '#94a3b8',
               font: { family: 'Inter', size: 12 },
-              callback: (val) => '$' + val
+              callback: (val) => formatCurrency(val, { minimumFractionDigits: 0, maximumFractionDigits: 0 })
             }
           }
         }
@@ -118,7 +118,7 @@ const FinanceCharts = {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (ctx) => ` ${ctx.label}: ${ctx.raw}% ($${categories[ctx.dataIndex].amount})`
+              label: (ctx) => ` ${ctx.label}: ${ctx.raw}% (${formatCurrency(categories[ctx.dataIndex].amount)})`
             }
           }
         }
@@ -173,7 +173,7 @@ const FinanceCharts = {
         },
         scales: {
           x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
-          y: { grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', callback: v => '$' + v } }
+          y: { grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', callback: v => formatCurrency(v, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) } }
         }
       }
     });
@@ -235,7 +235,7 @@ const FinanceCharts = {
         },
         scales: {
           x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
-          y: { grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', callback: v => '$' + v } }
+          y: { grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', callback: v => formatCurrency(v, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) } }
         }
       }
     });

@@ -107,7 +107,7 @@ const FinanceData = {
     totalSpent: 3515.20,
     remaining: 684.80,
     savingsGoalTarget: 2000.00,
-    recommendation: "Based on last month's spending patterns, we recommend increasing your 'Transportation' budget by 10% and reducing 'Shopping' to hit your $2,000 savings goal.",
+    recommendation: "Based on last month's spending patterns, we recommend increasing your 'Transportation' budget by 10% and reducing 'Shopping' to hit your ₹2,000 savings goal.",
     cumulativeSpending: {
       labels: ["Day 1", "Day 5", "Day 10", "Day 15", "Day 20", "Day 25", "Day 30"],
       spent: [300, 850, 1400, 2100, 2750, 3200, 3515],
@@ -117,12 +117,12 @@ const FinanceData = {
       {
         type: "warning",
         title: "Budget Exceeded",
-        message: "'Food & Dining' is $120 over the limit. Adjust other categories to compensate."
+        message: "'Food & Dining' is ₹120 over the limit. Adjust other categories to compensate."
       },
       {
         type: "success",
         title: "Saving Opportunity",
-        message: "Your 'Entertainment' spend is 40% lower than usual. Extra $120 could be moved to savings."
+        message: "Your 'Entertainment' spend is 40% lower than usual. Extra ₹120 could be moved to savings."
       }
     ]
   },
@@ -160,7 +160,7 @@ const FinanceData = {
 
   savingsGoals: {
     heroTarget: "You're 72% closer to your 2024 targets!",
-    heroDetail: "Based on your current spending patterns, you can reach your 'Emergency Fund' goal 2 months earlier by increasing your monthly transfer by $150.",
+    heroDetail: "Based on your current spending patterns, you can reach your 'Emergency Fund' goal 2 months earlier by increasing your monthly transfer by ₹150.",
     totalSavings: 76250,
     totalSavingsChange: 12.5,
     monthlyContribution: 2400,

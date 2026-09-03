@@ -20,8 +20,11 @@ const FinanceApp = {
         const meRes = await window.api.getCurrentUser();
         if (meRes && meRes.success && meRes.data && meRes.data.user) {
           const u = meRes.data.user;
+          FinanceData.user.firstName = u.firstName || '';
+          FinanceData.user.lastName = u.lastName || '';
           FinanceData.user.name = `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email;
           FinanceData.user.email = u.email;
+          FinanceData.user.phone = u.phone || '';
           if (u.avatar) FinanceData.user.avatar = u.avatar;
           if (u.plan) FinanceData.user.plan = u.plan;
           await this.loadAppData();
@@ -153,7 +156,7 @@ const FinanceApp = {
         this.handleNewGoalSubmit(e.target);
       } else if (e.target.id === 'settings-profile-form') {
         e.preventDefault();
-        this.showToast('Profile updated successfully!');
+        this.handleProfileUpdate(e.target);
       }
     });
   },
@@ -188,23 +191,31 @@ const FinanceApp = {
     const form = document.getElementById('auth-form');
     if (!form) return;
 
-    const email = form.querySelector('[name="email"]')?.value || 'alex@financeflow.com';
-    const password = form.querySelector('[name="password"]')?.value || 'password123';
+    const email = form.querySelector('[name="email"]')?.value.trim();
+    const password = form.querySelector('[name="password"]')?.value;
 
     try {
       let res;
       if (this.activeAuthTab === 'signup') {
-        const firstName = form.querySelector('[name="firstName"]')?.value || 'Alex';
-        const lastName = form.querySelector('[name="lastName"]')?.value || 'Morgan';
-        res = await window.api.register({ firstName, lastName, email, password });
+        const firstName = form.querySelector('[name="firstName"]')?.value.trim();
+        const lastName = form.querySelector('[name="lastName"]')?.value.trim();
+        const phone = form.querySelector('[name="phone"]')?.value.replace(/\D/g, '');
+        if (!firstName || !lastName || !/^[6-9]\d{9}$/.test(phone)) {
+          this.showToast('Enter a first name, last name, and valid 10-digit Indian mobile number.');
+          return;
+        }
+        res = await window.api.register({ firstName, lastName, phone, email, password });
       } else {
         res = await window.api.login({ email, password });
       }
 
       if (res && res.success && res.data) {
         if (res.data.user) {
+          FinanceData.user.firstName = res.data.user.firstName || '';
+          FinanceData.user.lastName = res.data.user.lastName || '';
           FinanceData.user.name = `${res.data.user.firstName || ''} ${res.data.user.lastName || ''}`.trim() || res.data.user.email;
           FinanceData.user.email = res.data.user.email;
+          FinanceData.user.phone = res.data.user.phone || '';
           if (res.data.user.avatar) FinanceData.user.avatar = res.data.user.avatar;
           if (res.data.user.plan) FinanceData.user.plan = res.data.user.plan;
         }
@@ -218,6 +229,38 @@ const FinanceApp = {
       console.error('Auth error:', err);
       this.showToast(err.message || 'Authentication failed. Please check credentials.');
     }
+  },
+
+  async handleProfileUpdate(form) {
+    const firstName = form.querySelector('[name="firstName"]').value.trim();
+    const lastName = form.querySelector('[name="lastName"]').value.trim();
+    const email = form.querySelector('[name="email"]').value.trim();
+    const phone = form.querySelector('[name="phone"]').value.replace(/\D/g, '');
+    if (!firstName || !lastName || !email || !/^[6-9]\d{9}$/.test(phone)) {
+      this.showToast('Enter valid profile details and a 10-digit Indian mobile number.');
+      return;
+    }
+    try {
+      const res = await window.api.updateProfile({ firstName, lastName, email, phone });
+      const user = res.data;
+      FinanceData.user.firstName = user.firstName;
+      FinanceData.user.lastName = user.lastName;
+      FinanceData.user.name = `${user.firstName} ${user.lastName}`.trim();
+      FinanceData.user.email = user.email;
+      FinanceData.user.phone = user.phone;
+      this.showToast('Profile updated successfully!');
+      this.render();
+    } catch (err) {
+      this.showToast(err.message || 'Unable to update profile.');
+    }
+  },
+
+  handleLogout() {
+    window.api.setToken(null);
+    FinanceData.user = { name: '', email: '', firstName: '', lastName: '', phone: '', avatar: '', plan: '' };
+    this.currentView = 'auth';
+    this.activeAuthTab = 'login';
+    this.render();
   },
 
   async handleNewExpenseSubmit(form) {
@@ -242,7 +285,7 @@ const FinanceApp = {
       });
 
       if (res && res.success) {
-        this.showToast(`Logged $${amount.toFixed(2)} expense for ${merchant}`);
+        this.showToast(`Logged ${formatCurrency(amount)} expense for ${merchant}`);
         form.reset();
         this.closeModals();
         await this.loadAppData();
@@ -272,7 +315,7 @@ const FinanceApp = {
 
     form.reset();
     this.closeModals();
-    this.showToast(`Logged $${amount.toFixed(2)} expense for ${merchant}`);
+    this.showToast(`Logged ${formatCurrency(amount)} expense for ${merchant}`);
 
     if (this.currentView === 'expenses' || this.currentView === 'dashboard') {
       this.render();
@@ -477,7 +520,7 @@ const FinanceApp = {
             </div>
             <div class="hero-stats">
               <div class="stat-item">
-                <h4>$2B+</h4>
+                <h4>₹2B+</h4>
                 <p>MANAGED</p>
               </div>
               <div class="stat-item">
@@ -582,18 +625,19 @@ const FinanceApp = {
                 <div class="form-group">
                   <label class="form-label">First & Last Name</label>
                   <div style="display: flex; gap: 10px;">
-                    <input type="text" name="firstName" class="form-input" placeholder="Alex" required value="Alex">
-                    <input type="text" name="lastName" class="form-input" placeholder="Morgan" required value="Morgan">
+                    <input type="text" name="firstName" class="form-input" placeholder="First name" required>
+                    <input type="text" name="lastName" class="form-input" placeholder="Last name" required>
                   </div>
                 </div>
               ` : ''}
+              ${this.activeAuthTab === 'signup' ? '<div class="form-group"><label class="form-label">Phone Number</label><input type="tel" name="phone" class="form-input" placeholder="9876543210" pattern="[6-9][0-9]{9}" maxlength="10" required></div>' : ''}
               <div class="form-group">
                 <label class="form-label">Email Address</label>
                 <div class="input-wrapper">
                   <span class="input-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                   </span>
-                  <input type="email" name="email" class="form-input" placeholder="name@company.com" required value="alex@financeflow.com">
+                  <input type="email" name="email" class="form-input" placeholder="name@company.com" required>
                 </div>
               </div>
 
@@ -606,7 +650,7 @@ const FinanceApp = {
                   <span class="input-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                   </span>
-                  <input type="password" name="password" class="form-input" value="password123" required>
+                  <input type="password" name="password" class="form-input" required>
                   <button type="button" class="input-icon-right">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
@@ -749,7 +793,7 @@ const FinanceApp = {
             <span class="trend-badge trend-up">↗ ${s.balanceChange}%</span>
           </div>
           <div class="stat-label">TOTAL BALANCE</div>
-          <div class="stat-value">$${s.totalBalance.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+          <div class="stat-value">${formatCurrency(s.totalBalance)}</div>
         </div>
 
         <div class="card">
@@ -760,7 +804,7 @@ const FinanceApp = {
             <span class="trend-badge trend-up">↗ ${s.incomeChange}%</span>
           </div>
           <div class="stat-label">MONTHLY INCOME</div>
-          <div class="stat-value">$${s.monthlyIncome.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+          <div class="stat-value">${formatCurrency(s.monthlyIncome)}</div>
         </div>
 
         <div class="card">
@@ -771,7 +815,7 @@ const FinanceApp = {
             <span class="trend-badge trend-down">↘ ${Math.abs(s.expenseChange)}%</span>
           </div>
           <div class="stat-label">MONTHLY EXPENSE</div>
-          <div class="stat-value">$${s.monthlyExpense.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+          <div class="stat-value">${formatCurrency(s.monthlyExpense)}</div>
         </div>
 
         <div class="card">
@@ -858,7 +902,7 @@ const FinanceApp = {
             <span class="trend-badge trend-down">↘ 12.5%</span>
           </div>
           <div class="stat-label">TOTAL MONTHLY SPEND</div>
-          <div class="stat-value">$${FinanceData.dashboardStats.monthlyExpense.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+          <div class="stat-value">${formatCurrency(FinanceData.dashboardStats.monthlyExpense)}</div>
         </div>
 
         <div class="card">
@@ -867,7 +911,7 @@ const FinanceApp = {
             <span class="trend-badge trend-up">↗ 3.2%</span>
           </div>
           <div class="stat-label">AVERAGE DAILY SPEND</div>
-          <div class="stat-value">$142.85</div>
+          <div class="stat-value">${formatCurrency(142.85)}</div>
         </div>
 
         <div class="card">
@@ -885,7 +929,7 @@ const FinanceApp = {
             <span class="trend-badge trend-up">↗ 0.0%</span>
           </div>
           <div class="stat-label">FIXED EXPENSES</div>
-          <div class="stat-value">$2,100.00</div>
+          <div class="stat-value">${formatCurrency(2100)}</div>
         </div>
       </div>
 
@@ -911,7 +955,7 @@ const FinanceApp = {
             <div class="grid-2-equal" style="gap: 10px;">
               <div class="form-group">
                 <label class="form-label">Amount</label>
-                <input type="number" step="0.01" name="amount" class="form-input" style="padding-left: 1rem;" placeholder="$ 0.00" required>
+                <input type="number" step="0.01" name="amount" class="form-input" style="padding-left: 1rem;" placeholder="₹ 0.00" required>
               </div>
               <div class="form-group">
                 <label class="form-label">Category</label>
@@ -1029,7 +1073,7 @@ const FinanceApp = {
         <td><span class="badge badge-category">${t.category}</span></td>
         <td><span class="badge ${t.status === 'Completed' ? 'badge-completed' : 'badge-pending'}">• ${t.status}</span></td>
         <td style="font-weight: 700; color: ${t.amount < 0 ? 'var(--text-dark)' : '#10b981'};">
-          ${t.amount < 0 ? '-' : '+'}$${Math.abs(t.amount).toFixed(2)}
+                    ${t.amount < 0 ? '-' : '+'}${formatCurrency(Math.abs(t.amount))}
         </td>
       </tr>
     `).join('');
@@ -1075,22 +1119,22 @@ const FinanceApp = {
       <div class="stat-grid-4">
         <div class="card">
           <div class="stat-label">Total Budget</div>
-          <div class="stat-value">$${b.totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+          <div class="stat-value">${formatCurrency(b.totalBudget)}</div>
           <p class="subhead" style="font-size: 0.75rem; margin-top: 4px;">Set for 8 categories</p>
         </div>
         <div class="card">
           <div class="stat-label">Total Spent</div>
-          <div class="stat-value">$${b.totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2})} <span style="font-size: 0.85rem; color: #ef4444;">+12%</span></div>
+          <div class="stat-value">${formatCurrency(b.totalSpent)} <span style="font-size: 0.85rem; color: #ef4444;">+12%</span></div>
           <p class="subhead" style="font-size: 0.75rem; margin-top: 4px;">83% of monthly limit</p>
         </div>
         <div class="card">
           <div class="stat-label">Remaining</div>
-          <div class="stat-value" style="color: #10b981;">$${b.remaining.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
-          <p class="subhead" style="font-size: 0.75rem; margin-top: 4px;">Average $97/day</p>
+          <div class="stat-value" style="color: #10b981;">${formatCurrency(b.remaining)}</div>
+          <p class="subhead" style="font-size: 0.75rem; margin-top: 4px;">Average ${formatCurrency(97, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}/day</p>
         </div>
         <div class="card">
           <div class="stat-label">Savings Goal</div>
-          <div class="stat-value">$${b.savingsGoalTarget.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+          <div class="stat-value">${formatCurrency(b.savingsGoalTarget)}</div>
           <p class="subhead" style="font-size: 0.75rem; margin-top: 4px;">Target for this month</p>
         </div>
       </div>
@@ -1164,7 +1208,7 @@ const FinanceApp = {
             <span class="trend-badge trend-up">↗ +${a.incomeChange}%</span>
           </div>
           <div class="stat-label">TOTAL INCOME</div>
-          <div class="stat-value">$${a.totalIncome.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+          <div class="stat-value">${formatCurrency(a.totalIncome)}</div>
         </div>
 
         <div class="card">
@@ -1173,7 +1217,7 @@ const FinanceApp = {
             <span class="trend-badge trend-down">↘ +${a.expenseChange}%</span>
           </div>
           <div class="stat-label">TOTAL EXPENSES</div>
-          <div class="stat-value">$${a.totalExpenses.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+          <div class="stat-value">${formatCurrency(a.totalExpenses)}</div>
         </div>
 
         <div class="card">
@@ -1182,7 +1226,7 @@ const FinanceApp = {
             <span class="trend-badge trend-up">↗ +${a.savingsChange}%</span>
           </div>
           <div class="stat-label">NET SAVINGS</div>
-          <div class="stat-value">$${a.netSavings.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+          <div class="stat-value">${formatCurrency(a.netSavings)}</div>
         </div>
 
         <div class="card">
@@ -1370,23 +1414,23 @@ const FinanceApp = {
             <div class="grid-2-equal">
               <div class="form-group">
                 <label class="form-label">First Name</label>
-                <input type="text" class="form-input" style="padding-left: 1rem;" value="Alex">
+                <input type="text" name="firstName" class="form-input" style="padding-left: 1rem;" value="${u.firstName || ''}" required>
               </div>
               <div class="form-group">
                 <label class="form-label">Last Name</label>
-                <input type="text" class="form-input" style="padding-left: 1rem;" value="Morgan">
+                <input type="text" name="lastName" class="form-input" style="padding-left: 1rem;" value="${u.lastName || ''}" required>
               </div>
             </div>
 
             <div class="form-group">
               <label class="form-label">Email Address</label>
-              <input type="email" class="form-input" style="padding-left: 1rem;" value="${u.email}">
+              <input type="email" name="email" class="form-input" style="padding-left: 1rem;" value="${u.email}" required>
             </div>
 
             <div class="grid-2-equal">
               <div class="form-group">
                 <label class="form-label">Phone Number</label>
-                <input type="text" class="form-input" style="padding-left: 1rem;" value="${u.phone}">
+                <input type="tel" name="phone" class="form-input" style="padding-left: 1rem;" value="${u.phone || ''}" pattern="[6-9][0-9]{9}" maxlength="10" required>
               </div>
               <div class="form-group">
                 <label class="form-label">Timezone</label>
@@ -1405,6 +1449,7 @@ const FinanceApp = {
               Danger Zone
             </h4>
             <p style="font-size: 0.8rem; color: #991b1b;">Permanently delete your account and all associated financial data.</p>
+            <button type="button" class="btn btn-outline btn-sm" onclick="FinanceApp.handleLogout()">Log Out</button>
           </div>
         </div>
 
@@ -1460,7 +1505,7 @@ const FinanceApp = {
 
             <div class="grid-2-equal">
               <div class="form-group">
-                <label class="form-label">Amount ($)</label>
+                <label class="form-label">Amount (₹)</label>
                 <input type="number" step="0.01" name="amount" class="form-input" style="padding-left: 1rem;" placeholder="0.00" required>
               </div>
               <div class="form-group">
@@ -1503,11 +1548,11 @@ const FinanceApp = {
 
             <div class="grid-2-equal">
               <div class="form-group">
-                <label class="form-label">Target Amount ($)</label>
+                <label class="form-label">Target Amount (₹)</label>
                 <input type="number" name="targetAmount" class="form-input" style="padding-left: 1rem;" placeholder="2500" required>
               </div>
               <div class="form-group">
-                <label class="form-label">Initial Amount ($)</label>
+                <label class="form-label">Initial Amount (₹)</label>
                 <input type="number" name="currentAmount" class="form-input" style="padding-left: 1rem;" placeholder="500">
               </div>
             </div>

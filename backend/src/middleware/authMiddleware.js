@@ -19,6 +19,7 @@ export const authenticateToken = async (req, res, next) => {
         firstName: true,
         lastName: true,
         email: true,
+        phone: true,
         avatar: true,
         plan: true
       }

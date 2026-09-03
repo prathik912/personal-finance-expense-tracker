@@ -115,6 +115,13 @@ class ApiService {
     return await this.request('/auth/me');
   }
 
+  async updateProfile(profile) {
+    return await this.request('/users/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profile)
+    });
+  }
+
   // Dashboard Summary Endpoint
   async getDashboardSummary() {
     return await this.request('/dashboard/summary');

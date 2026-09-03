@@ -20,7 +20,7 @@ export const renderModals = () => {
               <input type="text" class="form-input" id="budget-cat-name" placeholder="e.g. Subscriptions & Tools" required />
             </div>
             <div class="form-group">
-              <label class="form-label">Monthly Limit ($)</label>
+              <label class="form-label">Monthly Limit (₹)</label>
               <input type="number" class="form-input" id="budget-cat-limit" placeholder="e.g. 500" min="1" step="10" required />
             </div>
           </div>
@@ -57,11 +57,11 @@ export const renderModals = () => {
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Current Saved ($)</label>
+                <label class="form-label">Current Saved (₹)</label>
                 <input type="number" class="form-input" id="goal-current" placeholder="0" min="0" required />
               </div>
               <div class="form-group">
-                <label class="form-label">Target Amount ($)</label>
+                <label class="form-label">Target Amount (₹)</label>
                 <input type="number" class="form-input" id="goal-target" placeholder="3000" min="10" required />
               </div>
             </div>

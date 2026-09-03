@@ -18,26 +18,33 @@ export const getUserProfile = async (userId) => {
 };
 
 export const updateUserProfile = async (userId, data) => {
-  return await prisma.user.update({
-    where: { id: userId },
-    data: {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      phone: data.phone,
-      timezone: data.timezone,
-      avatar: data.avatar
-    },
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      email: true,
-      phone: true,
-      timezone: true,
-      avatar: true,
-      plan: true
+  try {
+    return await prisma.user.update({
+      where: { id: userId },
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phone: data.phone
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        timezone: true,
+        avatar: true,
+        plan: true
+      }
+    });
+  } catch (error) {
+    if (error.code === 'P2002') {
+      error.statusCode = 409;
+      error.message = 'An account with this email address already exists';
     }
-  });
+    throw error;
+  }
 };
 
 export const deleteUserAccount = async (userId) => {

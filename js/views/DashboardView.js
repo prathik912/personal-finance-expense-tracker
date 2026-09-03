@@ -40,7 +40,7 @@ export const renderDashboardView = (store) => {
             <span class="badge badge-success">Live</span>
           </div>
           <span class="stat-title">TOTAL BALANCE</span>
-          <span class="stat-value">$${(safeStats.totalBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="stat-value">${formatCurrency(safeStats.totalBalance)}</span>
         </div>
 
         <div class="card stat-card">
@@ -49,7 +49,7 @@ export const renderDashboardView = (store) => {
             <span class="badge badge-success">Income</span>
           </div>
           <span class="stat-title">MONTHLY INCOME</span>
-          <span class="stat-value">$${(safeStats.monthlyIncome || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="stat-value">${formatCurrency(safeStats.monthlyIncome)}</span>
         </div>
 
         <div class="card stat-card">
@@ -58,7 +58,7 @@ export const renderDashboardView = (store) => {
             <span class="badge badge-danger">Expense</span>
           </div>
           <span class="stat-title">MONTHLY EXPENSE</span>
-          <span class="stat-value">$${(safeStats.monthlyExpense || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="stat-value">${formatCurrency(safeStats.monthlyExpense)}</span>
         </div>
 
         <div class="card stat-card">
@@ -150,7 +150,7 @@ export const renderDashboardView = (store) => {
                 </div>
                 <div style="text-align: right;">
                   <div style="font-weight: 700; font-size: 0.9375rem; color: ${tx.type === 'income' ? 'var(--success)' : 'var(--text-main)'};">
-                    ${tx.type === 'income' ? '+' : '-'}$${(tx.amount || 0).toFixed(2)}
+                    ${tx.type === 'income' ? '+' : '-'}${formatCurrency(Math.abs(tx.amount || 0))}
                   </div>
                   <span class="badge ${tx.status === 'Completed' ? 'badge-success' : 'badge-warning'}" style="font-size: 0.7rem;">${tx.status}</span>
                 </div>

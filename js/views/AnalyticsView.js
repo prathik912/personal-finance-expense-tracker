@@ -34,7 +34,7 @@ export const renderAnalyticsView = (store) => {
             <span class="badge badge-success">Income</span>
           </div>
           <span class="stat-title">TOTAL INCOME</span>
-          <span class="stat-value">$${(safeStats.monthlyIncome || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="stat-value">${formatCurrency(safeStats.monthlyIncome)}</span>
         </div>
 
         <div class="card stat-card">
@@ -43,7 +43,7 @@ export const renderAnalyticsView = (store) => {
             <span class="badge badge-danger">Expense</span>
           </div>
           <span class="stat-title">TOTAL EXPENSES</span>
-          <span class="stat-value">$${(safeStats.monthlyExpense || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="stat-value">${formatCurrency(safeStats.monthlyExpense)}</span>
         </div>
 
         <div class="card stat-card">
@@ -52,7 +52,7 @@ export const renderAnalyticsView = (store) => {
             <span class="badge badge-success">Net</span>
           </div>
           <span class="stat-title">NET SAVINGS</span>
-          <span class="stat-value">$${netSavings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="stat-value">${formatCurrency(netSavings)}</span>
         </div>
 
         <div class="card stat-card">
@@ -98,7 +98,7 @@ export const renderAnalyticsView = (store) => {
 
           <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; font-weight: 700;">
             <span>Total Analyzed</span>
-            <span>$${totalAnalyzed.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            <span>${formatCurrency(totalAnalyzed)}</span>
           </div>
         </div>
       </div>

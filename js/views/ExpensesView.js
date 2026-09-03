@@ -57,7 +57,7 @@ export const renderExpensesView = (store) => {
             <span class="badge badge-primary">Total</span>
           </div>
           <span class="stat-title">TOTAL MONTHLY SPEND</span>
-          <span class="stat-value">$${totalSpend.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="stat-value">${formatCurrency(totalSpend)}</span>
         </div>
 
         <div class="card stat-card">
@@ -66,7 +66,7 @@ export const renderExpensesView = (store) => {
             <span class="badge badge-success">Average</span>
           </div>
           <span class="stat-title">AVERAGE PER TRANSACTION</span>
-          <span class="stat-value">$${avgSpend.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="stat-value">${formatCurrency(avgSpend)}</span>
         </div>
 
         <div class="card stat-card">
@@ -84,7 +84,7 @@ export const renderExpensesView = (store) => {
             <span class="badge badge-neutral">Recurring</span>
           </div>
           <span class="stat-title">RECURRING EXPENSES</span>
-          <span class="stat-value">$${recurringTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="stat-value">${formatCurrency(recurringTotal)}</span>
         </div>
       </div>
 
@@ -111,7 +111,7 @@ export const renderExpensesView = (store) => {
 
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Amount ($)</label>
+                <label class="form-label">Amount (₹)</label>
                 <input type="number" step="0.01" class="form-input" id="amount-input" placeholder="0.00" required />
               </div>
               <div class="form-group">

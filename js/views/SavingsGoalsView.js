@@ -37,7 +37,7 @@ export const renderSavingsGoalsView = (store) => {
             <span class="badge badge-success">Saved</span>
           </div>
           <span class="stat-title">TOTAL SAVINGS</span>
-          <span class="stat-value">$${totalSaved.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="stat-value">${formatCurrency(totalSaved)}</span>
         </div>
 
         <div class="card stat-card">
@@ -46,7 +46,7 @@ export const renderSavingsGoalsView = (store) => {
             <span class="badge badge-primary">Target</span>
           </div>
           <span class="stat-title">TOTAL TARGET</span>
-          <span class="stat-value">$${totalTarget.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="stat-value">${formatCurrency(totalTarget)}</span>
         </div>
 
         <div class="card stat-card">
@@ -84,11 +84,11 @@ export const renderSavingsGoalsView = (store) => {
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1rem 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-bottom: 1rem;">
                   <div>
                     <span class="text-muted" style="font-size: 0.75rem;">Current Savings</span>
-                    <div style="font-weight: 800; font-size: 1.125rem;">$${current.toLocaleString()}</div>
+                    <div style="font-weight: 800; font-size: 1.125rem;">${formatCurrency(current)}</div>
                   </div>
                   <div style="text-align: right;">
                     <span class="text-muted" style="font-size: 0.75rem;">Target</span>
-                    <div style="font-weight: 800; font-size: 1.125rem; color: var(--text-muted);">$${target.toLocaleString()}</div>
+                    <div style="font-weight: 800; font-size: 1.125rem; color: var(--text-muted);">${formatCurrency(target)}</div>
                   </div>
                 </div>
 
@@ -98,7 +98,7 @@ export const renderSavingsGoalsView = (store) => {
               </div>
 
               <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; font-size: 0.8125rem;">
-                <span style="font-weight: 700; color: var(--primary);">$${remaining.toLocaleString()} remaining</span>
+                <span style="font-weight: 700; color: var(--primary);">${formatCurrency(remaining)} remaining</span>
               </div>
             </div>
           `;

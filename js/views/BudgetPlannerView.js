@@ -40,7 +40,7 @@ export const renderBudgetPlannerView = (store) => {
             <span class="badge badge-primary">Total</span>
           </div>
           <span class="stat-title">TOTAL BUDGET</span>
-          <span class="stat-value">$${totalBudget.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="stat-value">${formatCurrency(totalBudget)}</span>
           <span class="text-muted" style="font-size: 0.75rem;">Set for ${categories.length} categories</span>
         </div>
 
@@ -50,7 +50,7 @@ export const renderBudgetPlannerView = (store) => {
             <span class="badge ${pctUsed > 100 ? 'badge-danger' : 'badge-success'}">${pctUsed}%</span>
           </div>
           <span class="stat-title">TOTAL SPENT</span>
-          <span class="stat-value">$${totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="stat-value">${formatCurrency(totalSpent)}</span>
           <span class="text-muted" style="font-size: 0.75rem;">${pctUsed}% of monthly limit</span>
         </div>
 
@@ -60,7 +60,7 @@ export const renderBudgetPlannerView = (store) => {
             <span class="badge badge-neutral">Net</span>
           </div>
           <span class="stat-title">REMAINING BUDGET</span>
-          <span class="stat-value">$${totalRemaining.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="stat-value">${formatCurrency(totalRemaining)}</span>
           <span class="text-muted" style="font-size: 0.75rem;">Available balance</span>
         </div>
 
@@ -91,13 +91,13 @@ export const renderBudgetPlannerView = (store) => {
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                   <div>
                     <h3 class="heading-sm">${cat.name}</h3>
-                    <span class="text-muted" style="font-size: 0.75rem;">Monthly Limit: $${limit.toLocaleString()}</span>
+                    <span class="text-muted" style="font-size: 0.75rem;">Monthly Limit: ${formatCurrency(limit)}</span>
                   </div>
                   <span class="badge ${isExceeded ? 'badge-danger' : 'badge-primary'}">${pct}% used</span>
                 </div>
 
                 <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;">
-                  $${spent.toLocaleString()}
+                  ${formatCurrency(spent)}
                 </div>
 
                 <div class="progress-bar-bg">
@@ -107,7 +107,7 @@ export const renderBudgetPlannerView = (store) => {
                 <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; margin-top: 0.5rem;">
                   <span class="text-muted">SPENT</span>
                   <span style="color: ${isExceeded ? 'var(--danger)' : 'var(--text-muted)'};">
-                    ${isExceeded ? `OVER BY $${diff.toLocaleString()}` : `$${diff.toLocaleString()} LEFT`}
+                    ${isExceeded ? `OVER BY ${formatCurrency(diff)}` : `${formatCurrency(diff)} LEFT`}
                   </span>
                 </div>
               </div>
