@@ -169,22 +169,7 @@ const FinanceApp = {
 
   switchAuthTab(tab) {
     this.activeAuthTab = tab;
-    document.querySelectorAll('[data-auth-tab]').forEach(btn => {
-      btn.classList.toggle('active', btn.getAttribute('data-auth-tab') === tab);
-    });
-    const formTitle = document.getElementById('auth-title');
-    const formDesc = document.getElementById('auth-desc');
-    const submitBtn = document.getElementById('auth-submit-btn');
-
-    if (tab === 'login') {
-      if (formTitle) formTitle.textContent = 'Welcome Back';
-      if (formDesc) formDesc.textContent = 'Enter your credentials to access your financial dashboard.';
-      if (submitBtn) submitBtn.innerHTML = 'Sign In <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
-    } else {
-      if (formTitle) formTitle.textContent = 'Create an Account';
-      if (formDesc) formDesc.textContent = 'Start tracking expenses and building wealth today.';
-      if (submitBtn) submitBtn.innerHTML = 'Get Started <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
-    }
+    this.render();
   },
 
   async handleAuthSubmit() {
@@ -199,13 +184,45 @@ const FinanceApp = {
       if (this.activeAuthTab === 'signup') {
         const firstName = form.querySelector('[name="firstName"]')?.value.trim();
         const lastName = form.querySelector('[name="lastName"]')?.value.trim();
-        const phone = form.querySelector('[name="phone"]')?.value.replace(/\D/g, '');
-        if (!firstName || !lastName || !/^[6-9]\d{9}$/.test(phone)) {
-          this.showToast('Enter a first name, last name, and valid 10-digit Indian mobile number.');
+        const rawPhone = form.querySelector('[name="phone"]')?.value || '';
+        const phone = rawPhone.replace(/\D/g, '');
+        const confirmPassword = form.querySelector('[name="confirmPassword"]')?.value;
+
+        if (!firstName) {
+          this.showToast('Please enter your First Name.');
           return;
         }
+        if (!lastName) {
+          this.showToast('Please enter your Last Name.');
+          return;
+        }
+        if (!phone || phone.length !== 10 || !/^[6-9]\d{9}$/.test(phone)) {
+          this.showToast('Please enter a valid 10-digit Indian mobile number.');
+          return;
+        }
+        if (!email || !/\S+@\S+\.\S+/.test(email)) {
+          this.showToast('Please enter a valid email address.');
+          return;
+        }
+        if (!password || password.length < 6) {
+          this.showToast('Password must be at least 6 characters long.');
+          return;
+        }
+        if (password !== confirmPassword) {
+          this.showToast('Passwords do not match. Please confirm your password.');
+          return;
+        }
+
         res = await window.api.register({ firstName, lastName, phone, email, password });
       } else {
+        if (!email || !/\S+@\S+\.\S+/.test(email)) {
+          this.showToast('Please enter a valid email address.');
+          return;
+        }
+        if (!password) {
+          this.showToast('Please enter your password.');
+          return;
+        }
         res = await window.api.login({ email, password });
       }
 
@@ -623,14 +640,19 @@ const FinanceApp = {
             <form id="auth-form">
               ${this.activeAuthTab === 'signup' ? `
                 <div class="form-group">
-                  <label class="form-label">First & Last Name</label>
-                  <div style="display: flex; gap: 10px;">
-                    <input type="text" name="firstName" class="form-input" placeholder="First name" required>
-                    <input type="text" name="lastName" class="form-input" placeholder="Last name" required>
-                  </div>
+                  <label class="form-label">First Name</label>
+                  <input type="text" name="firstName" class="form-input" placeholder="First name" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Last Name</label>
+                  <input type="text" name="lastName" class="form-input" placeholder="Last name" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Mobile Number</label>
+                  <input type="tel" name="phone" class="form-input" placeholder="Enter 10-digit mobile number" pattern="[6-9][0-9]{9}" maxlength="10" required>
+                  <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Enter 10-digit mobile number</span>
                 </div>
               ` : ''}
-              ${this.activeAuthTab === 'signup' ? '<div class="form-group"><label class="form-label">Phone Number</label><input type="tel" name="phone" class="form-input" placeholder="9876543210" pattern="[6-9][0-9]{9}" maxlength="10" required></div>' : ''}
               <div class="form-group">
                 <label class="form-label">Email Address</label>
                 <div class="input-wrapper">
@@ -650,12 +672,21 @@ const FinanceApp = {
                   <span class="input-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                   </span>
-                  <input type="password" name="password" class="form-input" required>
-                  <button type="button" class="input-icon-right">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                  </button>
+                  <input type="password" name="password" class="form-input" placeholder="••••••••••••" required>
                 </div>
               </div>
+
+              ${this.activeAuthTab === 'signup' ? `
+                <div class="form-group">
+                  <label class="form-label">Confirm Password</label>
+                  <div class="input-wrapper">
+                    <span class="input-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </span>
+                    <input type="password" name="confirmPassword" class="form-input" placeholder="••••••••••••" required>
+                  </div>
+                </div>
+              ` : ''}
 
               <div class="form-options">
                 <label class="checkbox-label">
@@ -764,7 +795,7 @@ const FinanceApp = {
     return `
       <div class="page-header">
         <div class="page-title-group">
-          <h1>Welcome back, Alex</h1>
+          <h1>Welcome back, ${FinanceData.user.firstName || FinanceData.user.name || 'User'}</h1>
           <p class="subhead">Here's a summary of your financial health today.</p>
         </div>
         <div class="page-actions">
@@ -1347,8 +1378,8 @@ const FinanceApp = {
               </div>
 
               <div style="display: flex; justify-content: space-between; font-size: 0.875rem;">
-                <span style="color: var(--text-muted);">Current: <strong style="color: var(--text-dark);">$${goal.currentAmount.toLocaleString()}</strong></span>
-                <span style="color: var(--text-muted);">Goal: <strong style="color: var(--text-dark);">$${goal.targetAmount.toLocaleString()}</strong></span>
+                <span style="color: var(--text-muted);">Current: <strong style="color: var(--text-dark);">${formatCurrency(goal.currentAmount)}</strong></span>
+                <span style="color: var(--text-muted);">Goal: <strong style="color: var(--text-dark);">${formatCurrency(goal.targetAmount)}</strong></span>
               </div>
             </div>
           `;
@@ -1367,7 +1398,7 @@ const FinanceApp = {
           <p class="subhead">Manage your account preferences, security settings, and notification frequency.</p>
         </div>
         <div class="page-actions">
-          <button class="btn btn-primary btn-sm" onclick="FinanceApp.showToast('Changes saved successfully!')">Save Changes</button>
+          <button type="submit" form="settings-profile-form" class="btn btn-primary btn-sm">Save Changes</button>
         </div>
       </div>
 
